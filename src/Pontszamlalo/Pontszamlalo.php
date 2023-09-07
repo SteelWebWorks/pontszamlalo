@@ -16,6 +16,10 @@ class Pontszamlalo
 
     private $resultsToCalculate;
 
+    private $calculatedBasePoints = 0;
+
+    private $calculatedExtraPoints = 0;
+
     public function __construct(array $data)
     {
         $this->targetCourse = $data['valasztott-szak'];
@@ -28,36 +32,52 @@ class Pontszamlalo
 
     public function calculatePoints()
     {
-        $points = $this->calculateBasePoints();
+        $this->calculateBasePoints();
+        $this->calculateExtraPointsByLanguae();
 
-        return $points;
+        if ($this->calculatedExtraPoints > 100) {
+            $this->calculatedExtraPoints = 100;
+        }
+
+        $finalPoints = $this->calculatedBasePoints + $this->calculatedExtraPoints;
+
+        return "A felvételiző pontszáma: {$finalPoints} pont ({$this->calculatedBasePoints} + {$this->calculatedExtraPoints})";
     }
 
     private function calculateBasePoints()
     {
-        $result = 0;
+
         // Base Result
         foreach ($this->resultsToCalculate as $resultToCalculate) {
-            $result += ExamValidation::convertResultToInt($resultToCalculate['eredmeny']);
+            $this->calculatedBasePoints += ExamValidation::convertResultToInt($resultToCalculate['eredmeny']);
+            if ($resultToCalculate['tipus'] == 'emelt') {
+                $this->calculatedExtraPoints += 50;
+            }
         }
-        $result *= 2;
-        return $result;
+        $this->calculatedBasePoints *= 2;
+
     }
 
-    private function filterExtraPointsByLanguae()
+    private function calculateExtraPointsByLanguae()
     {
 
         $languageExams = [];
         foreach ($this->extraPoints as $extraPoint) {
-            if ($languageExams[$extraPoint['kategoria']] == 'Nyelvvizsga') {
-                if (empty($languageExams[$extraPoint['nyelv']])) {
-                    $languageExams[$extraPoint['nyelv']] = [];
-                } else {
-                    array_push($languageExams[$extraPoint['nyelv']], $extraPoint);
+            if ($extraPoint['kategoria'] == 'Nyelvvizsga') {
+                if (empty($languageExams[$extraPoint['nyelv']]) || ($languageExams[$extraPoint['nyelv']]['tipus'] == 'B2' && $extraPoint['tipus'] == 'C1')) {
+                    $languageExams[$extraPoint['nyelv']] = $extraPoint['tipus'];
                 }
             }
         }
-        return $languageExams;
+
+        foreach ($languageExams as $languageExam) {
+            if ($languageExam == 'B2') {
+                $this->calculatedExtraPoints += 28;
+            } else {
+                $this->calculatedExtraPoints += 40;
+            }
+        }
+
     }
 
     private function validate()
