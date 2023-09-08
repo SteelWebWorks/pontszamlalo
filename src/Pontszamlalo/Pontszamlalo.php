@@ -27,7 +27,6 @@ class Pontszamlalo
         $this->extraPoints = $data['tobbletpontok'];
 
         $this->validate();
-        $this->calculatePoints();
     }
 
     public function calculatePoints()
@@ -39,9 +38,6 @@ class Pontszamlalo
             $this->calculatedExtraPoints = 100;
         }
 
-        $finalPoints = $this->calculatedBasePoints + $this->calculatedExtraPoints;
-
-        return "A felvételiző pontszáma: {$finalPoints} pont ({$this->calculatedBasePoints} + {$this->calculatedExtraPoints})";
     }
 
     private function calculateBasePoints()
@@ -98,5 +94,15 @@ class Pontszamlalo
             throw new InvalidArgumentException('Nem teljesített kötelezően választható tárgy(ak)!');
         }
 
+    }
+
+    public function getCalculatedExtraPoints()
+    {
+        return $this->calculatedExtraPoints;
+    }
+
+    public function getCalculatedBasePoints()
+    {
+        return $this->calculatedBasePoints;
     }
 }

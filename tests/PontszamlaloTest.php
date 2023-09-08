@@ -321,9 +321,11 @@ class PontszamlaloTest extends TestCase
         $pontszamlalo->calculatePoints();
     }
 
-    public function testCalculateBasePoints()
+    public function testCalculatedPoints()
     {
         $pontszamlalo = new Pontszamlalo($this->examleDatas['exampleData']);
-        $this->assertEquals(370, $pontszamlalo->calculatePoints());
+        $pontszamlalo->calculatePoints();
+        $this->assertEquals(370, $pontszamlalo->getCalculatedBasePoints());
+        $this->assertEquals(100, $pontszamlalo->getCalculatedExtraPoints());
     }
 }
